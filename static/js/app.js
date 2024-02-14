@@ -1,48 +1,63 @@
 const url = 'https://2u-data-curriculum-team.s3.amazonaws.com/dataviz-classroom/v1.1/14-Interactive-Web-Visualizations/02-Homework/samples.json'
 
-d3.json(url).then(response => {
-    console.log(response.samples);
+// Fetch data from the URL
+d3.json(url)
+  .then(response => {
+    console.log(response.samples); // Check if the response is as expected
 
-    // Extract otu_ids, sample_values, and otu_labels
-    const otu_ids = response.samples.map(item => item.otu_ids);
-    const sample_values = response.samples.map(item => item.sample_values);
-    const otu_labels = response.samples.map(item => item.otu_labels);
+    // Call the init function after obtaining the response
+    init(response);
+  })
+  .catch(error => {
+    console.error('Error fetching data:', error);
+  });
 
-    // Flatten the arrays
-    const flattened_otu_ids = [].concat.apply([], otu_ids);
-    const flattened_sample_values = [].concat.apply([], sample_values);
-    const flattened_otu_labels = [].concat.apply([], otu_labels);
-    console.log(flattened_otu_ids)
-    // Create an array of objects to preserve the relationship between otu_id, sample_value, and otu_label
-    // const dataObjects = flattened_otu_ids.map((id, index) => ({
-    //     otu_id: id,
-    //     sample_value: flattened_sample_values[index],
-    //     otu_label: flattened_otu_labels[index]
-    // }));
+function BarChart(sample) {
+    // Sort sample values in descending order
+    var sortedData = sample.sample_values.sort((a, b) => b - a);
+    var top10Values = sortedData.slice(0, 10).reverse();
 
-    // Sort the dataObjects array in descending order by sample_value
-    // dataObjects.sort((a, b) => b.sample_value - a.sample_value);
-    // console.log(dataObjects)
+    // Select corresponding OTU IDs and labels
+    var top10IDs = [];
+    var top10Labels = [];
+    for (let i = 0; i < top10Values.length; i++) {
+        // Find the index of the sorted value in the original array
+        let index = sample.sample_values.indexOf(top10Values[i]);
+        top10IDs.push(`OTU ${sample.otu_ids[index]}`);
+        top10Labels.push(sample.otu_labels[index]);
+    }
 
-    // Select only the top 10 OTUs
-    // const top10DataObjects = dataObjects.slice(0, 10);
-    // console.log(top10DataObjects)
+    var trace = {
+        x: top10Values,
+        y: top10IDs,
+        text: top10Labels,
+        type: 'bar',
+        orientation: 'h'
+    };
 
-    // Extract sorted otu_ids, sample_values, and otu_labels for the top 10 OTUs
-    // const top10_otu_ids = top10DataObjects.map(item => item.otu_id);
-    // const top10_sample_values = top10DataObjects.map(item => item.sample_value);
-    // const top10_otu_labels = top10DataObjects.map(item => item.otu_label);
-    // console.log(top10_otu_ids)
+    var data = [trace];
 
-    // Create trace
-    // const trace1 = {
-    //     x: top10_sample_values,
-    //     y: top10_otu_ids.map(id => `OTU ${id}`),
-    //     text: top10_otu_labels,
-    //     type: 'bar',
-    //     orientation: 'h'
-    // };
+    Plotly.newPlot('bar', data);
+}
 
-    // // Plot the bar chart
-    // Plotly.newPlot("bar", [trace1]);
-});
+function dropDownchange(response) {
+  var selectedId = d3.select('#selDataset').property('value');
+  var individualData = response.samples.find(data => data.id === selectedId);
+  BarChart(individualData);
+}
+
+function init(response) {
+  var dropdown = d3.select('#selDataset');
+
+  response.samples.forEach(data => {
+    dropdown.append('option').text(data.id).property('value', data.id);
+  });
+
+  // Attach a change event listener to the dropdown
+  dropdown.on('change', function() {
+    dropDownchange(response);
+  });
+
+  // Display initial data
+  BarChart(response.samples[0]);
+}
