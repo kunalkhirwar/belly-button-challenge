@@ -1,8 +1,4 @@
-// Define the optionChanged function
-function optionChanged(selectedValue) {
-  // This function will be called when the dropdown selection changes
-  // console.log('Selected value:', selectedValue);
-}
+
 
 
 const url = 'https://2u-data-curriculum-team.s3.amazonaws.com/dataviz-classroom/v1.1/14-Interactive-Web-Visualizations/02-Homework/samples.json'
@@ -10,7 +6,7 @@ const url = 'https://2u-data-curriculum-team.s3.amazonaws.com/dataviz-classroom/
 // Fetch data from the URL
 d3.json(url)
   .then(response => {
-    console.log(response); // Check if the response is as expected
+    console.log(response); // To check if the response is as expected
 
     // Call the init function after obtaining the response
     init(response);
@@ -18,7 +14,7 @@ d3.json(url)
 
 function BarChart(sample) {
     // Sort sample values in descending order
-    var sortedData = sample.sample_values.slice().sort((a, b) => b - a);
+    var sortedData = sample.sample_values.sort((a, b) => b - a);
     var top10Values = sortedData.slice(0, 10).reverse();
 
     // Select corresponding OTU IDs and labels
@@ -69,6 +65,12 @@ function BubbleChart(sample) {
     Plotly.newPlot('bubble', data, layout);
 }
 
+// Define the optionChanged function
+function optionChanged(selectedValue) {
+//   // This function will be called when the dropdown selection changes
+//   // console.log('Selected value:', selectedValue);
+}
+
 function displayMetadata(metadata) {
   var metadataPanel = d3.select("#sample-metadata");
   metadataPanel.html(""); // Clear previous content
@@ -76,28 +78,30 @@ function displayMetadata(metadata) {
   if (metadata) {
       Object.entries(metadata).forEach(([key, value]) => {
           metadataPanel.append("p").text(`${key}: ${value}`);
+          // console.log(`${key}: ${value}`)
       });
   }
 }
 
 function dropDownchange(response) {
   var selectedId = d3.select('#selDataset').property('value');
-  console.log("Selected ID:", selectedId);
+  // console.log("Selected ID:", selectedId);
 
   // Find individual data by ID
   var individualData = response.samples.find(data => data.id === selectedId);
-  console.log("Individual Data:", individualData);
+  // console.log("Individual Data:", individualData);
   
   // Update bar chart and bubble chart with individual data
   BarChart(individualData);
   BubbleChart(individualData);
 
   // Find metadata by ID
-  var selectedMetadata = response.metadata.find(data => data.id === selectedId);
-  console.log("Selected Metadata:", selectedMetadata);
+  console.log(response)
+  var selectedMetadata = response.metadata.filter(data => parseInt(data.id) === parseInt(selectedId));
+  // console.log("Selected Metadata:", selectedMetadata[0]);
 
   // Display metadata for the selected ID
-  displayMetadata(selectedMetadata);
+  displayMetadata(selectedMetadata[0]);
 }
 
 function init(response) {
