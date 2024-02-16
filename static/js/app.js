@@ -11,8 +11,7 @@ d3.json(url)
   });
 
 function BarChart(sample) {
-    // Sort sample values in descending order
-    // var sortedData = sample.sample_values.sort((a, b) => b - a);
+    // slice top 10 sample values
     var top10Values =  sample.sample_values.slice(0, 10).reverse();
     
     // Select corresponding OTU IDs and labels
@@ -59,85 +58,17 @@ function BubbleChart(sample) {
 }
 
 function updateGauge(washingFrequency) {
-  var level = washingFrequency * 20;
-
-  // Trig to calc meter point
-  var degrees = 180 - level,
-    radius = 0.5;
-  var radians = (degrees * Math.PI) / 180;
-  var x = radius * Math.cos(radians);
-  var y = radius * Math.sin(radians);
-
-  // Path
-  var mainPath = 'M -.0 -0.025 L .0 0.025 L ',
-    pathX = String(x),
-    space = ' ',
-    pathY = String(y),
-    pathEnd = ' Z';
-  var path = mainPath.concat(pathX, space, pathY, pathEnd);
-
   var data = [
     {
-      x: [0],
-      y: [0],
-      marker: { size: 12, color: '850000' },
-      showlegend: false
-
-    },
-    {
-      values: [1, 1, 1, 1, 1, 1, 1, 1, 1, 9],
-      rotation: 90,
-      text: ['8-9', '7-8', '6-7', '5-6', '4-5', '3-4', '2-3', '1-2', '0-1'],
-      textinfo: 'text',
-      textposition: 'inside',
-      marker: {
-        colors: [
-          'rgba(0, 105, 11, .5)',
-          'rgba(10, 120, 22, .5)',
-          'rgba(14, 127, 0, .5)',
-          'rgba(110, 154, 22, .5)',
-          'rgba(170, 202, 42, .5)',
-          'rgba(202, 209, 95, .5)',
-          'rgba(210, 206, 145, .5)',
-          'rgba(232, 226, 202, .5)',
-          'rgba(240, 230, 215, .5)',
-          'rgba(255, 255, 255, 0)'
-        ]
-      },
-      hole: 0.5,
-      type: 'pie',
-      showlegend: false
+      domain: { x: [0, 1], y: [0, 1] },
+      value: washingFrequency,
+      title: { text: "Belly Button Washing Frequency <br> Scrubs per Week"},
+      type: "indicator",
+      mode: "gauge+number"
     }
   ];
-
-  var layout = {
-    shapes: [
-      {
-        type: 'path',
-        path: path,
-        fillcolor: '850000',
-        line: {
-          color: '850000'
-        }
-      }
-    ],
-    title: '<b>Belly Button Washing Frequency</b><br>Scrubs per Week',
-    height: 500,
-    width: 500,
-    xaxis: {
-      zeroline: false,
-      showticklabels: false,
-      showgrid: false,
-      range: [-1, 1]
-    },
-    yaxis: {
-      zeroline: false,
-      showticklabels: false,
-      showgrid: false,
-      range: [-1, 1]
-    }
-  };
-
+  
+  var layout = { width: 600, height: 500, margin: { t: 0, b: 0 } };
   Plotly.newPlot('gauge', data, layout);
 }
 
@@ -172,7 +103,7 @@ function dropDownchange(response) {
   BubbleChart(individualData);
 
   // Find metadata by ID
-  console.log(response)
+  // console.log(response)
   var selectedMetadata = response.metadata.filter(data => parseInt(data.id) === parseInt(selectedId));
   // console.log("Selected Metadata:", selectedMetadata[0]);
 
@@ -198,8 +129,8 @@ function init(response) {
   });
 
   // Display initial data based on the first sample
-  BarChart(response.samples[0]);
-  BubbleChart(response.samples[0]);
-  displayMetadata(response.metadata[0]); // Display metadata for the first sample
-  updateGauge(response.metadata[0].wfreq);
+  BarChart(response.samples[0]);              // Display barchart of Top 10 OTUs for the first sample 
+  BubbleChart(response.samples[0]);           // Display bubble for the first sample
+  displayMetadata(response.metadata[0]);      // Display metadata for the first sample
+  updateGauge(response.metadata[0].wfreq);    // Display washing frequency for the first sample
 }
