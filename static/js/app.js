@@ -74,8 +74,8 @@ function updateGauge(washingFrequency) {
 
 // Define the optionChanged function
 function optionChanged(selectedValue) {
-//   // This function will be called when the dropdown selection changes
-//   // console.log('Selected value:', selectedValue);
+// This function will be called when the dropdown selection changes
+// console.log('Selected value:', selectedValue);
 }
 
 function displayMetadata(metadata) {
